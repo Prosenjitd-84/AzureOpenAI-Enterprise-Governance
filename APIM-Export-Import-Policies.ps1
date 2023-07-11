@@ -1,5 +1,5 @@
-$apimServiceName = "apim-glb-eastus"
-$resourceGroupName = "rg-glb-eastus"
+$apimServiceName = "XXXX"
+$resourceGroupName = "XXXX"
 
 # Create APIM context
 $context = New-AzApiManagementContext -ResourceGroupName $resourceGroupName -ServiceName $apimServiceName

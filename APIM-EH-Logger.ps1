@@ -1,7 +1,7 @@
-$apimServiceName = "apim-glb-eastus"
-$resourceGroupName = "rg-glb-eastus"
-$ehNameSpace = "OpenAIChargeBackEHNamespace"
-$ehName = "OpenAIChargeBackEH"
+$apimServiceName = "XXXX"
+$resourceGroupName = "XXXX"
+$ehNameSpace = "XXXX"
+$ehName = "XXXX"
 
 
 # Create APIM context

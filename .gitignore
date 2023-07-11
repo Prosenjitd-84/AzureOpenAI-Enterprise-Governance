@@ -32,3 +32,17 @@ override.tf.json
 # Ignore CLI configuration files
 .terraformrc
 terraform.rc
+.terraform.lock.hcl
+
+.terraform.tfstate.lock.info
+.terraform/providers/registry.terraform.io/hashicorp/azurerm/3.58.0/windows_386/terraform-provider-azurerm_v3.58.0_x5.exe
+.gitignore
+.terraform/providers/registry.terraform.io/hashicorp/random/3.5.1/windows_386/terraform-provider-random_v3.5.1_x5.exe
+terraform.tfstate.backup
+.terraform/providers/registry.terraform.io/hashicorp/azuread/2.15.0/windows_386/terraform-provider-azuread_v2.15.0_x5.exe
+backend.conf
+main.tfplan
+sample_bashrc
+
+**/.apis/*
+tfplan

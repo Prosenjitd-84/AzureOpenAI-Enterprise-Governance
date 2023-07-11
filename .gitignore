@@ -42,7 +42,6 @@ terraform.tfstate.backup
 .terraform/providers/registry.terraform.io/hashicorp/azuread/2.15.0/windows_386/terraform-provider-azuread_v2.15.0_x5.exe
 backend.conf
 main.tfplan
-sample_bashrc
 
 **/.apis/*
 tfplan

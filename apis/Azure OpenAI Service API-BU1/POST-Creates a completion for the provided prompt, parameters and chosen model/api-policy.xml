@@ -9,11 +9,66 @@
     - Remove the <base> element to prevent inheriting policies from the corresponding section element in the enclosing scope.
     - Policies are applied in the order of their appearance, from the top down.
     - Comments within policy elements are not supported and may disappear. Place your comments between policy elements or at a higher level scope.
---><policies><inbound><base /><!--<set-variable name="WorkspaceName" value="Business Unit 1" />--><set-variable name="BusinessUnitName" value="Business Unit 1" /><cors allow-credentials="false"><allowed-origins><origin>*</origin></allowed-origins><allowed-methods><method>GET</method><method>POST</method></allowed-methods></cors><set-backend-service base-url="{{svc_base_url}}" /><set-variable name="OpenAI-Instance-Invoked" value="{{svc_base_url}}" /><cache-lookup-value key="{{svc_base_url}}-token-key" variable-name="token" caching-type="internal" /><cache-lookup-value key="{{svc_base_url}}-token-exp-key" variable-name="token-exp" caching-type="internal" /><choose><when condition="@(!context.Variables.ContainsKey(&quot;token&quot;) || &#xA;                               !context.Variables.ContainsKey(&quot;token-exp&quot;) ||&#xA;                               (context.Variables.ContainsKey(&quot;token&quot;) &amp;&amp; &#xA;                                context.Variables.ContainsKey(&quot;token-exp&quot;) &amp;&amp; &#xA;                                (DateTime.Parse((String)context.Variables[&quot;token-exp&quot;]).AddMinutes(-1.0) &#xA;                                 &lt;= DateTime.UtcNow) &#xA;                               )&#xA;                            )"><send-request ignore-error="false" timeout="{{svc_token_acquisition_timeout}}" response-variable-name="jwt" mode="new"><set-url>{{svc_token_endpoint}}</set-url><set-method>POST</set-method><set-header name="Content-Type" exists-action="override"><value>application/x-www-form-urlencoded</value></set-header><set-header name="Authorization" exists-action="override"><value>@("Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes("{{OpenAI-SPN-BU1-ID}}:{{OpenAI-SPN-BU1-Secret}}")))</value></set-header><set-body>@{
+-->
+<policies>
+    <inbound>
+        <base />
+        <!--<set-variable name="WorkspaceName" value="Business Unit 1" />-->
+        <set-variable name="BusinessUnitName" value="Business Unit 1" />
+        <cors allow-credentials="false">
+            <allowed-origins>
+                <origin>*</origin>
+            </allowed-origins>
+            <allowed-methods>
+                <method>GET</method>
+                <method>POST</method>
+            </allowed-methods>
+        </cors>
+        <set-backend-service base-url="{{svc_base_url}}" />
+        <set-variable name="OpenAI-Instance-Invoked" value="{{svc_base_url}}" />
+        <cache-lookup-value key="{{svc_base_url}}-token-key" variable-name="token" caching-type="internal" />
+        <cache-lookup-value key="{{svc_base_url}}-token-exp-key" variable-name="token-exp" caching-type="internal" />
+        <choose>
+            <when condition="@(!context.Variables.ContainsKey(&quot;token&quot;) || &#xA;                               !context.Variables.ContainsKey(&quot;token-exp&quot;) ||&#xA;                               (context.Variables.ContainsKey(&quot;token&quot;) &amp;&amp; &#xA;                                context.Variables.ContainsKey(&quot;token-exp&quot;) &amp;&amp; &#xA;                                (DateTime.Parse((String)context.Variables[&quot;token-exp&quot;]).AddMinutes(-1.0) &#xA;                                 &lt;= DateTime.UtcNow) &#xA;                               )&#xA;                            )">
+                <send-request ignore-error="false" timeout="{{svc_token_acquisition_timeout}}" response-variable-name="jwt" mode="new">
+                    <set-url>{{svc_token_endpoint}}</set-url>
+                    <set-method>POST</set-method>
+                    <set-header name="Content-Type" exists-action="override">
+                        <value>application/x-www-form-urlencoded</value>
+                    </set-header>
+                    <set-header name="Authorization" exists-action="override">
+                        <value>@("Basic " + Convert.ToBase64String(Encoding.UTF8.GetBytes("{{OpenAI-SPN-BU1-ID}}:{{OpenAI-SPN-BU1-Secret}}")))</value>
+                    </set-header>
+                    <set-body>@{
                             return "client_id={{OpenAI-SPN-BU1-ID}}&amp;scope={{scope}}&amp;client_secret={{OpenAI-SPN-BU1-Secret}}&amp;grant_type=client_credentials";
-                    }</set-body></send-request><set-header name="Authorization" exists-action="override"><value>@("Bearer " + (String)((IResponse)context.Variables["jwt"]).Body.As&lt;JObject&gt;(preserveContent: true)["access_token"])</value></set-header><!--  Don't expose APIM subscription key to the backend. --><set-header name="Ocp-Apim-Subscription-Key" exists-action="delete" /><set-variable name="token" value="@((String)((IResponse)context.Variables[&quot;jwt&quot;]).Body.As&lt;JObject&gt;(preserveContent: true)[&quot;access_token&quot;])" /><set-variable name="token-exp" value="@{&#xA;                    string jwt = (String)context.Variables[&quot;token&quot;];&#xA;                    string base64 = jwt.Split('.')[1].Replace(&quot;-&quot;, &quot;+&quot;).Replace(&quot;_&quot;, &quot;/&quot;);&#xA;                    int mod4 = base64.Length % 4;&#xA;                    if (mod4 &gt; 0)&#xA;                    {&#xA;                        base64 += new String('=', 4 - mod4);&#xA;                    }&#xA;                    string base64_encoded = System.Text.Encoding.ASCII.GetString(Convert.FromBase64String(base64));&#xA;                    double exp_num = (double)JObject.Parse(base64_encoded)[&quot;exp&quot;];&#xA;                    DateTime exp = (new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)).AddSeconds(exp_num);&#xA;                    return exp.ToString(&quot;MM-dd-yyyy HH:mm:ss&quot;);&#xA;                }" /><cache-store-value key="{{svc_base_url}}-token-key" value="@((String)context.Variables[&quot;token&quot;])" duration="3600" caching-type="internal" /><cache-store-value key="{{svc_base_url}}-token-exp-key" value="@((String)context.Variables[&quot;token-exp&quot;])" duration="3600" caching-type="internal" /></when></choose><set-header name="Authorization" exists-action="override"><value>@{
+                    }</set-body>
+                </send-request>
+                <set-header name="Authorization" exists-action="override">
+                    <value>@("Bearer " + (String)((IResponse)context.Variables["jwt"]).Body.As&lt;JObject&gt;(preserveContent: true)["access_token"])</value>
+                </set-header>
+                <!--  Don't expose APIM subscription key to the backend. -->
+                <set-header name="Ocp-Apim-Subscription-Key" exists-action="delete" />
+                <set-variable name="token" value="@((String)((IResponse)context.Variables[&quot;jwt&quot;]).Body.As&lt;JObject&gt;(preserveContent: true)[&quot;access_token&quot;])" />
+                <set-variable name="token-exp" value="@{&#xA;                    string jwt = (String)context.Variables[&quot;token&quot;];&#xA;                    string base64 = jwt.Split('.')[1].Replace(&quot;-&quot;, &quot;+&quot;).Replace(&quot;_&quot;, &quot;/&quot;);&#xA;                    int mod4 = base64.Length % 4;&#xA;                    if (mod4 &gt; 0)&#xA;                    {&#xA;                        base64 += new String('=', 4 - mod4);&#xA;                    }&#xA;                    string base64_encoded = System.Text.Encoding.ASCII.GetString(Convert.FromBase64String(base64));&#xA;                    double exp_num = (double)JObject.Parse(base64_encoded)[&quot;exp&quot;];&#xA;                    DateTime exp = (new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)).AddSeconds(exp_num);&#xA;                    return exp.ToString(&quot;MM-dd-yyyy HH:mm:ss&quot;);&#xA;                }" />
+                <cache-store-value key="{{svc_base_url}}-token-key" value="@((String)context.Variables[&quot;token&quot;])" duration="3600" caching-type="internal" />
+                <cache-store-value key="{{svc_base_url}}-token-exp-key" value="@((String)context.Variables[&quot;token-exp&quot;])" duration="3600" caching-type="internal" />
+            </when>
+        </choose>
+        <set-header name="Authorization" exists-action="override">
+            <value>@{
                 return $"Bearer {(String)context.Variables["token"]}";
-            }</value></set-header></inbound><backend><base /></backend><outbound><base /><!--<set-variable name="response" value="@(context.Response.Body.As<JObject>(preserveContent: true))" /> --><choose><when condition="@(context.Response.StatusCode == 200)"><log-to-eventhub logger-id="APIM-EH-Logger">@{
+            }</value>
+        </set-header>
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+        <!--<set-variable name="response" value="@(context.Response.Body.As<JObject>(preserveContent: true))" /> -->
+        <choose>
+            <when condition="@(context.Response.StatusCode == 200)">
+                <log-to-eventhub logger-id="APIM-EH-Logger">@{
                 return new JObject(
                     new JProperty("EventTime", DateTime.UtcNow.ToString()),
                     new JProperty("ServiceName", context.Deployment.ServiceName),
@@ -24,8 +79,21 @@
                     new JProperty("OpenAIInstanceInvoked", context.Variables["OpenAI-Instance-Invoked"]),
                     new JProperty("TotalTokens",  context.Response.Body.As&lt;JObject&gt;(preserveContent: true).SelectToken("usage.total_tokens").ToString())
                 ).ToString();
-                }</log-to-eventhub></when></choose><choose><when condition="@(context.Response.StatusCode == 200)"><!-- NOTE that we are not using preserveContent=true when deserializing response body stream into a JSON object since we don't intend to access it again. See details on https://docs.microsoft.com/en-us/azure/api-management/api-management-transformation-policies#SetBody --><set-body>@{                   
+                }</log-to-eventhub>
+            </when>
+        </choose>
+        <choose>
+            <when condition="@(context.Response.StatusCode == 200)">
+                <!-- NOTE that we are not using preserveContent=true when deserializing response body stream into a JSON object since we don't intend to access it again. See details on https://docs.microsoft.com/en-us/azure/api-management/api-management-transformation-policies#SetBody -->
+                <set-body>@{                   
                 JObject api_response = context.Response.Body.As&lt;JObject&gt;(preserveContent: true);                
                 return api_response.ToString();                         
                     
-                }</set-body></when></choose></outbound><on-error><base /></on-error></policies>
+                }</set-body>
+            </when>
+        </choose>
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
